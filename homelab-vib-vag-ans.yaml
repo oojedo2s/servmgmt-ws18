@@ -1,0 +1,53 @@
+
+---
+- name: Virtualbox
+  hosts: homelab
+  become: yes
+  tasks:
+    - name: add virtualbox repository
+      apt_repository: repo="deb http://download.virtualbox.org/virtualbox/debian bionic contrib"  state=present
+    - name: add virtualbox oracle key 
+      apt_key: url=http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc     state=present
+    - name: install virtualbox
+      apt: name="virtualbox-5.2" state=present update_cache=yes
+    - name: install virtualbox dkms package
+      apt: name=dkms state=present
+    - name: Check installed version
+      command: vboxmanage -v
+      register: vboxversion
+    - name: display installed version
+      debug: 
+        msg: "Installed Version is {{ vboxversion.stdout }}"
+#        var=vboxversion.stdout
+
+- name: Vagrant
+  hosts: homelab
+  become: yes
+  tasks:  
+    - name: Download vagrant
+      get_url: url=https://releases.hashicorp.com/vagrant/2.2.0/vagrant_2.2.0_{{ansible_architecture}}.deb dest=/home/oojedo2s/downloads/vagrant_2.2.0.deb
+    - name: Install vagrant 
+      apt: deb=/home/oojedo2s/downloads//vagrant_2.2.0.deb
+    - name: Check installed version
+      command: vagrant --version
+      register: vagversion
+    - name: display installed version
+      debug:
+        msg: "Installed Version is {{ vagversion.stdout }}"
+
+- name: Ansible
+  hosts: homelab
+  become: yes
+  tasks: 
+    - name: add repository of ansible
+      apt_repository: repo='ppa:ansible/ansible'
+    - name: cache update
+      apt: update_cache=yes
+    - name: install Ansible.
+      apt: name=ansible
+    - name: Check installed version
+      command: ansible --version
+      register: ansversion
+    - name: display installed version
+      debug:
+        msg: "Installed Version is {{ ansversion.stdout }}"
